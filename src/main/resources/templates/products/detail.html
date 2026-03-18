@@ -33,7 +33,10 @@
 
                 <div sec:authorize="isAuthenticated()" class="user-menu">
                     <a th:href="@{/profile}" class="user-info">
-                        <span class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">U</span>
+                        <span th:if="${currentUser != null and currentUser.avatar != null and !currentUser.avatar.isEmpty()}" class="user-avatar">
+                            <img th:src="${currentUser.avatar}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                        </span>
+                        <span th:unless="${currentUser != null and currentUser.avatar != null and !currentUser.avatar.isEmpty()}" class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">U</span>
                         <span class="user-name" th:text="${#authentication.name}">Username</span>
                     </a>
                     <form th:action="@{/logout}" method="post" style="display: inline;">
@@ -104,6 +107,30 @@
                 </div>
             </div>
         </div>
+
+        <!-- Sản phẩm tương tự -->
+        <section th:if="${recommendedProducts != null and !#lists.isEmpty(recommendedProducts)}" style="margin-top: 3rem;">
+            <h2 class="section-title">Sản phẩm tương tự</h2>
+            <p class="section-desc">Cùng danh mục với sản phẩm này</p>
+            <div class="products-grid">
+                <a th:each="rp : ${recommendedProducts}"
+                   th:href="@{/product/{id}(id=${rp.id})}"
+                   class="product-card">
+                    <img th:src="${rp.imageUrl != null ? rp.imageUrl : '/images/no-image.png'}"
+                         alt="Product Image" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title" th:text="${rp.title}">Product Title</h3>
+                        <div class="product-price" th:text="${#numbers.formatDecimal(rp.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">Price</div>
+                        <div class="product-meta">
+                            <span th:text="${rp.category.name}">Category</span>
+                            <span class="product-condition"
+                                  th:classappend="${rp.condition == 'NEW'} ? 'condition-new' : (${rp.condition == 'LIKE_NEW'} ? 'condition-like-new' : 'condition-used')"
+                                  th:text="${rp.condition == 'NEW'} ? 'Mới' : (${rp.condition == 'LIKE_NEW'} ? 'Như mới' : 'Đã sử dụng')">Condition</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
     </main>
     
     <main class="container" th:unless="${product}">

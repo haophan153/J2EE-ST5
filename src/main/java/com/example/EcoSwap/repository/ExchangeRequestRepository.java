@@ -26,6 +26,14 @@ public interface ExchangeRequestRepository extends JpaRepository<ExchangeRequest
     
     @Query("SELECT e FROM ExchangeRequest e WHERE e.id = :id AND (e.requester.id = :requesterId OR e.owner.id = :ownerId)")
     Optional<ExchangeRequest> findByIdAndUserId(@Param("id") Long id, @Param("requesterId") Long requesterId, @Param("ownerId") Long ownerId);
+
+    @Query("""
+        SELECT e FROM ExchangeRequest e
+        WHERE e.status = :status AND (e.requester.id = :userId OR e.owner.id = :userId)
+        """)
+    Page<ExchangeRequest> findHistoryByUserAndStatus(@Param("userId") Long userId,
+                                                     @Param("status") ExchangeStatus status,
+                                                     Pageable pageable);
     
     List<ExchangeRequest> findByStatusAndRequesterIdOrOwnerId(
         ExchangeStatus status, Long requesterId, Long ownerId);

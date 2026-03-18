@@ -28,6 +28,7 @@ public class GlobalControllerAdvice {
                     List.of(ExchangeStatus.PENDING, ExchangeStatus.NEGOTIATING)
                 );
                 model.addAttribute("pendingExchangeCount", pendingCount);
+                model.addAttribute("currentUser", user); // Để hiển thị avatar trong navbar
             });
         }
     }

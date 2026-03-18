@@ -33,9 +33,13 @@
 
                 <div sec:authorize="isAuthenticated()" class="user-menu">
                     <a th:href="@{/profile}" class="user-info">
-                        <span class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">U</span>
+                        <span th:if="${currentUser != null and currentUser.avatar != null and !currentUser.avatar.isEmpty()}" class="user-avatar">
+                            <img th:src="${currentUser.avatar}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                        </span>
+                        <span th:unless="${currentUser != null and currentUser.avatar != null and !currentUser.avatar.isEmpty()}" class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">U</span>
                         <span class="user-name" th:text="${#authentication.name}">Username</span>
                     </a>
+                    
                     <form th:action="@{/logout}" method="post" style="display: inline;">
                         <button type="submit" class="btn btn-outline">Đăng xuất</button>
                     </form>

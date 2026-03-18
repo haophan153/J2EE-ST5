@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sản phẩm của tôi - EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header>
+    <nav class="navbar">
+        <a th:href="@{/}" class="logo"><span>♻️</span> Eco<span>Swap</span></a>
+        <ul class="nav-links">
+            <li><a th:href="@{/}">Trang chủ</a></li>
+            <li><a th:href="@{/products}">Sản phẩm</a></li>
+            <li><a th:href="@{/categories}">Danh mục</a></li>
+            <li><a th:href="@{/exchanges}" sec:authorize="isAuthenticated()">Trao đổi</a></li>
+        </ul>
+        <div class="nav-actions">
+            <a th:href="@{/products/create}" class="btn btn-primary" sec:authorize="isAuthenticated()">Đăng bán</a>
+            <a th:href="@{/profile}" class="btn btn-outline" sec:authorize="isAuthenticated()">Tài khoản</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container">
+    <h2 class="section-title">Sản phẩm của tôi</h2>
+
+    <div th:if="${param.success}" class="alert alert-success">
+        <span th:switch="${param.success[0]}">
+            <span th:case="'updated'">Cập nhật sản phẩm thành công!</span>
+            <span th:case="'deleted'">Xóa sản phẩm thành công!</span>
+            <span th:case="*">Thành công!</span>
+        </span>
+    </div>
+    <div th:if="${param.error}" class="alert alert-danger">
+        <span th:switch="${param.error[0]}">
+            <span th:case="'not_owner'">Bạn không có quyền thao tác sản phẩm này.</span>
+            <span th:case="'in_exchange'">Sản phẩm đang/đã liên quan tới trao đổi nên không thể xóa.</span>
+            <span th:case="'cannot_delete_exchanged'">Sản phẩm đã trao đổi không thể xóa.</span>
+            <span th:case="'cannot_edit_exchanged'">Sản phẩm đã trao đổi không thể chỉnh sửa.</span>
+            <span th:case="*">Đã xảy ra lỗi.</span>
+        </span>
+    </div>
+
+    <form th:action="@{/products/my}" method="get" class="filter-form">
+        <input type="hidden" name="page" value="0">
+        <div class="filter-grid">
+            <div class="filter-group">
+                <label>Trạng thái</label>
+                <select name="status">
+                    <option value="" th:selected="${status == ''}">Tất cả</option>
+                    <option value="AVAILABLE" th:selected="${status == 'AVAILABLE'}">Đang bán</option>
+                    <option value="SOLD" th:selected="${status == 'SOLD'}">Đã bán</option>
+                    <option value="EXCHANGED" th:selected="${status == 'EXCHANGED'}">Đã trao đổi</option>
+                </select>
+            </div>
+            <div class="filter-group filter-actions">
+                <button type="submit" class="btn btn-primary">Lọc</button>
+                <a th:href="@{/products/my}" class="btn btn-outline">Xóa lọc</a>
+            </div>
+        </div>
+    </form>
+
+    <div class="products-grid">
+        <div th:each="p : ${products}" class="product-card" style="padding-bottom: 1rem;">
+            <a th:href="@{/product/{id}(id=${p.id})}" style="text-decoration:none; color:inherit;">
+                <img th:src="${p.imageUrl != null ? p.imageUrl : '/images/no-image.png'}" class="product-image" alt="Product Image">
+                <div class="product-info">
+                    <h3 class="product-title" th:text="${p.title}">Title</h3>
+                    <div class="product-price" th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">Price</div>
+                    <div class="product-meta">
+                        <span th:text="${p.category.name}">Category</span>
+                        <span th:text="${p.status}">STATUS</span>
+                    </div>
+                </div>
+            </a>
+
+            <div style="display:flex; gap:0.5rem; padding: 0 1rem;">
+                <a th:href="@{/products/{id}/edit(id=${p.id})}" class="btn btn-primary" style="padding:0.5rem 0.8rem;">Sửa</a>
+                <form th:action="@{/products/{id}/delete(id=${p.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-outline" style="padding:0.5rem 0.8rem;"
+                            onclick="return confirm('Bạn chắc chắn muốn xóa sản phẩm này?');">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(products)}" style="text-align:center; padding:2rem;">
+        <p style="color: var(--text-light);">Bạn chưa có sản phẩm nào.</p>
+        <a th:href="@{/products/create}" class="btn btn-primary">Đăng sản phẩm</a>
+    </div>
+
+    <div th:if="${totalPages > 1}" class="pagination" th:with="st=${status != '' ? status : null}">
+        <a th:if="${currentPage > 0}" th:href="@{/products/my(page=${currentPage - 1}, status=${st})}">Trước</a>
+        <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+            <a th:href="@{/products/my(page=${i}, status=${st})}"
+               th:text="${i + 1}"
+               th:classappend="${i == currentPage} ? 'active'">Page</a>
+        </span>
+        <a th:if="${currentPage < totalPages - 1}" th:href="@{/products/my(page=${currentPage + 1}, status=${st})}">Sau</a>
+    </div>
+</main>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>Về EcoSwap</h3>
+            <p>Nền tảng mua bán và trao đổi đồ cũ uy tín.</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2026 EcoSwap. All rights reserved.</p>
+    </div>
+</footer>
+</body>
+</html>
+

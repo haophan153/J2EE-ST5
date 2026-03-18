@@ -40,6 +40,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
     padding: 1rem 2rem;
     max-width: 1200px;
     margin: 0 auto;
@@ -80,6 +81,7 @@ header {
     display: flex;
     gap: 1rem;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 /* Buttons */
@@ -181,6 +183,64 @@ header {
     font-size: 1.8rem;
     margin-bottom: 1.5rem;
     color: var(--secondary-color);
+}
+
+.section-desc {
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+/* Filter Form */
+.filter-form {
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+}
+
+.filter-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.filter-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    min-width: 120px;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.filter-actions {
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.filter-actions .btn {
+    margin-right: 0.5rem;
 }
 
 .categories-grid {
@@ -554,6 +614,11 @@ footer {
         flex-direction: column;
         gap: 0.5rem;
     }
+
+    .btn {
+        padding: 0.5rem 0.9rem;
+        font-size: 0.95rem;
+    }
 }
 
 /* User Menu */
@@ -561,6 +626,7 @@ footer {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .user-info {

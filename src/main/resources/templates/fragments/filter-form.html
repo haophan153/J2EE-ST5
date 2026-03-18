@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="filter(action, keyword, preserveKeyword)">
+    <form th:action="${action}" method="get" class="filter-form">
+        <th:block th:if="${preserveKeyword}">
+            <input type="hidden" name="keyword" th:value="${keyword}">
+        </th:block>
+        <div class="filter-grid">
+            <div class="filter-group">
+                <label>Từ khóa</label>
+                <input type="text" name="keyword" th:value="${filter != null ? filter.keyword : ''}" 
+                       placeholder="Tìm trong kết quả..." th:unless="${preserveKeyword}">
+            </div>
+            <div class="filter-group">
+                <label>Danh mục</label>
+                <select name="categoryId">
+                    <option value="">Tất cả</option>
+                    <option th:each="c : ${categories}" th:value="${c.id}" 
+                            th:text="${c.name}"
+                            th:selected="${filter != null and filter.categoryId != null and filter.categoryId == c.id}"></option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Tình trạng</label>
+                <select name="condition">
+                    <option value="">Tất cả</option>
+                    <option value="NEW" th:selected="${filter != null and filter.condition == 'NEW'}">Mới</option>
+                    <option value="LIKE_NEW" th:selected="${filter != null and filter.condition == 'LIKE_NEW'}">Như mới</option>
+                    <option value="USED" th:selected="${filter != null and filter.condition == 'USED'}">Đã sử dụng</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Giá từ (VNĐ)</label>
+                <input type="number" name="minPrice" th:value="${filter != null ? filter.minPrice : ''}" 
+                       placeholder="0" min="0" step="1000">
+            </div>
+            <div class="filter-group">
+                <label>Đến (VNĐ)</label>
+                <input type="number" name="maxPrice" th:value="${filter != null ? filter.maxPrice : ''}" 
+                       placeholder="" min="0" step="1000">
+            </div>
+            <div class="filter-group">
+                <label>Địa điểm</label>
+                <input type="text" name="location" th:value="${filter != null ? filter.location : ''}" 
+                       placeholder="VD: Hà Nội">
+            </div>
+            <div class="filter-group">
+                <label>Sắp xếp</label>
+                <select name="sortBy">
+                    <option value="newest" th:selected="${filter == null or filter.sortBy == null or filter.sortBy == 'newest'}">Mới nhất</option>
+                    <option value="price_asc" th:selected="${filter != null and filter.sortBy == 'price_asc'}">Giá tăng dần</option>
+                    <option value="price_desc" th:selected="${filter != null and filter.sortBy == 'price_desc'}">Giá giảm dần</option>
+                    <option value="title" th:selected="${filter != null and filter.sortBy == 'title'}">Tên A-Z</option>
+                </select>
+            </div>
+            <div class="filter-group filter-actions">
+                <button type="submit" class="btn btn-primary">Lọc</button>
+                <a th:href="${action}" class="btn btn-outline">Xóa lọc</a>
+            </div>
+        </div>
+    </form>
+</th:block>
+
+<th:block th:fragment="filterCompact(action, preserveKeyword)">
+    <form th:action="${action}" method="get" class="filter-form compact">
+        <input type="hidden" name="keyword" th:value="${keyword}" th:if="${preserveKeyword}">
+        <input type="hidden" name="categoryId" th:value="${filter != null ? filter.categoryId : ''}" th:if="${filter != null and filter.categoryId != null}">
+        <div class="filter-row">
+            <select name="condition">
+                <option value="">Tình trạng</option>
+                <option value="NEW">Mới</option>
+                <option value="LIKE_NEW">Như mới</option>
+                <option value="USED">Đã sử dụng</option>
+            </select>
+            <input type="number" name="minPrice" placeholder="Giá từ" min="0" style="width: 100px;">
+            <input type="number" name="maxPrice" placeholder="Đến" min="0" style="width: 100px;">
+            <select name="sortBy">
+                <option value="newest">Mới nhất</option>
+                <option value="price_asc">Giá tăng</option>
+                <option value="price_desc">Giá giảm</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Lọc</button>
+        </div>
+    </form>
+</th:block>
+</html>

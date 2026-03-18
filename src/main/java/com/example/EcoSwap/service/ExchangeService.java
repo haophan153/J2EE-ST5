@@ -35,6 +35,10 @@ public class ExchangeService {
     public Page<ExchangeRequest> getReceivedRequestsPaged(Long userId, Pageable pageable) {
         return exchangeRequestRepository.findByOwnerId(userId, pageable);
     }
+
+    public Page<ExchangeRequest> getUserHistoryByStatus(Long userId, ExchangeStatus status, Pageable pageable) {
+        return exchangeRequestRepository.findHistoryByUserAndStatus(userId, status, pageable);
+    }
     
     public List<ExchangeRequest> getAllUserRequests(Long userId) {
         return exchangeRequestRepository.findByRequesterIdOrOwnerId(userId, userId);
@@ -50,6 +54,10 @@ public class ExchangeService {
     
     public boolean hasExistingRequest(Long requestedProductId, Long requesterId) {
         return exchangeRequestRepository.existsByRequestedProductIdAndRequesterId(requestedProductId, requesterId);
+    }
+
+    public boolean isProductInAnyExchange(Long productId) {
+        return exchangeRequestRepository.existsByOfferedProductIdOrRequestedProductId(productId, productId);
     }
     
     @Transactional

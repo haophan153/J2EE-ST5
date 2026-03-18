@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử bán / giao dịch - EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header>
+    <nav class="navbar">
+        <a th:href="@{/}" class="logo"><span>♻️</span> Eco<span>Swap</span></a>
+        <ul class="nav-links">
+            <li><a th:href="@{/}">Trang chủ</a></li>
+            <li><a th:href="@{/products}">Sản phẩm</a></li>
+            <li><a th:href="@{/categories}">Danh mục</a></li>
+            <li><a th:href="@{/products/my}" sec:authorize="isAuthenticated()">Sản phẩm của tôi</a></li>
+        </ul>
+        <div class="nav-actions">
+            <a th:href="@{/history/exchanges}" class="btn btn-outline" sec:authorize="isAuthenticated()">Lịch sử trao đổi</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container">
+    <h2 class="section-title">Lịch sử bán / giao dịch</h2>
+    <p class="section-desc">Các sản phẩm của bạn đã đánh dấu SOLD hoặc đã EXCHANGED.</p>
+
+    <div th:if="${#lists.isEmpty(products)}" class="alert alert-warning">
+        Chưa có sản phẩm nào trong lịch sử.
+    </div>
+
+    <div class="products-grid">
+        <a th:each="p : ${products}"
+           th:href="@{/product/{id}(id=${p.id})}"
+           class="product-card">
+            <img th:src="${p.imageUrl != null ? p.imageUrl : '/images/no-image.png'}"
+                 alt="Product Image" class="product-image">
+            <div class="product-info">
+                <h3 class="product-title" th:text="${p.title}">Product Title</h3>
+                <div class="product-price" th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">Price</div>
+                <div class="product-meta">
+                    <span th:text="${p.category.name}">Category</span>
+                    <span th:text="${p.status}">STATUS</span>
+                </div>
+                <div style="margin-top: 0.5rem; color: var(--text-light); font-size: 0.9rem;"
+                     th:text="${p.updatedAt != null ? #temporals.format(p.updatedAt, 'dd/MM/yyyy') : ''}"></div>
+            </div>
+        </a>
+    </div>
+
+    <div th:if="${totalPages > 1}" class="pagination">
+        <a th:if="${currentPage > 0}" th:href="@{/history/sales(page=${currentPage - 1})}">Trước</a>
+        <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+            <a th:href="@{/history/sales(page=${i})}"
+               th:text="${i + 1}"
+               th:classappend="${i == currentPage} ? 'active'">Page</a>
+        </span>
+        <a th:if="${currentPage < totalPages - 1}" th:href="@{/history/sales(page=${currentPage + 1})}">Sau</a>
+    </div>
+</main>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>Về EcoSwap</h3>
+            <p>Nền tảng mua bán và trao đổi đồ cũ uy tín.</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2026 EcoSwap. All rights reserved.</p>
+    </div>
+</footer>
+</body>
+</html>
+

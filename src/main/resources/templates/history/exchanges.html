@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử trao đổi - EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header>
+    <nav class="navbar">
+        <a th:href="@{/}" class="logo"><span>♻️</span> Eco<span>Swap</span></a>
+        <ul class="nav-links">
+            <li><a th:href="@{/}">Trang chủ</a></li>
+            <li><a th:href="@{/products}">Sản phẩm</a></li>
+            <li><a th:href="@{/categories}">Danh mục</a></li>
+            <li><a th:href="@{/products/my}" sec:authorize="isAuthenticated()">Sản phẩm của tôi</a></li>
+        </ul>
+        <div class="nav-actions">
+            <a th:href="@{/history/sales}" class="btn btn-outline" sec:authorize="isAuthenticated()">Lịch sử bán</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container">
+    <h2 class="section-title">Lịch sử trao đổi</h2>
+    <p class="section-desc">Danh sách các yêu cầu trao đổi đã hoàn tất (COMPLETED).</p>
+
+    <div th:if="${#lists.isEmpty(exchanges)}" class="alert alert-warning">
+        Chưa có trao đổi nào được hoàn tất.
+    </div>
+
+    <div th:each="req : ${exchanges}" class="product-card" style="padding: 1rem; margin-bottom: 1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+            <div>
+                <strong>#</strong><span th:text="${req.id}"></span>
+                <span style="margin-left:0.75rem; color: var(--text-light);"
+                      th:text="${req.updatedAt != null ? #temporals.format(req.updatedAt, 'dd/MM/yyyy HH:mm') : ''}"></span>
+            </div>
+            <span class="badge badge-success">COMPLETED</span>
+        </div>
+        <div style="display:flex; gap:1.5rem; align-items:center; margin-top:1rem; flex-wrap:wrap;">
+            <div style="flex:1; min-width:280px;">
+                <div style="display:flex; gap:0.75rem; align-items:center;">
+                    <img th:src="${req.offeredProduct.imageUrl != null ? req.offeredProduct.imageUrl : '/images/no-image.png'}"
+                         style="width:64px; height:64px; object-fit:cover; border-radius:8px;" alt="Offered">
+                    <div>
+                        <div><strong>Đề xuất:</strong> <span th:text="${req.offeredProduct.title}"></span></div>
+                        <div style="color: var(--text-light);" th:text="${#numbers.formatDecimal(req.offeredProduct.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></div>
+                    </div>
+                </div>
+            </div>
+            <div style="font-size:24px; color: var(--primary-color);">⇄</div>
+            <div style="flex:1; min-width:280px;">
+                <div style="display:flex; gap:0.75rem; align-items:center;">
+                    <img th:src="${req.requestedProduct.imageUrl != null ? req.requestedProduct.imageUrl : '/images/no-image.png'}"
+                         style="width:64px; height:64px; object-fit:cover; border-radius:8px;" alt="Requested">
+                    <div>
+                        <div><strong>Nhận:</strong> <span th:text="${req.requestedProduct.title}"></span></div>
+                        <div style="color: var(--text-light);" th:text="${#numbers.formatDecimal(req.requestedProduct.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <a th:href="@{/exchange/{id}(id=${req.id})}" class="btn btn-primary">Xem</a>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${totalPages > 1}" class="pagination">
+        <a th:if="${currentPage > 0}" th:href="@{/history/exchanges(page=${currentPage - 1})}">Trước</a>
+        <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+            <a th:href="@{/history/exchanges(page=${i})}"
+               th:text="${i + 1}"
+               th:classappend="${i == currentPage} ? 'active'">Page</a>
+        </span>
+        <a th:if="${currentPage < totalPages - 1}" th:href="@{/history/exchanges(page=${currentPage + 1})}">Sau</a>
+    </div>
+</main>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>Về EcoSwap</h3>
+            <p>Nền tảng mua bán và trao đổi đồ cũ uy tín.</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2026 EcoSwap. All rights reserved.</p>
+    </div>
+</footer>
+</body>
+</html>
+

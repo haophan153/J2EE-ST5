@@ -35,7 +35,10 @@
                 <!-- Đã đăng nhập: hiển thị Profile + Đăng xuất -->
                 <div sec:authorize="isAuthenticated()" class="user-menu">
                     <a th:href="@{/profile}" class="user-info">
-                        <span class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">U</span>
+                        <span th:if="${currentUser != null and currentUser.avatar != null and !currentUser.avatar.isEmpty()}" class="user-avatar">
+                            <img th:src="${currentUser.avatar}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                        </span>
+                        <span th:unless="${currentUser != null and currentUser.avatar != null and !currentUser.avatar.isEmpty()}" class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">U</span>
                         <span class="user-name" th:text="${#authentication.name}">Username</span>
                     </a>
                     <form th:action="@{/logout}" method="post" style="display: inline;">
@@ -68,9 +71,106 @@
             </div>
         </section>
         
-        <!-- Products Section -->
+        <!-- Filter Section -->
         <section>
-            <h2 class="section-title">Sản phẩm mới nhất</h2>
+            <h2 class="section-title" th:text="${keyword != null and !keyword.isEmpty()} ? 'Kết quả tìm kiếm' : 'Sản phẩm'">Sản phẩm</h2>
+            <!-- Form khi có từ khóa tìm kiếm -->
+            <form th:action="@{/search}" method="get" class="filter-form" th:if="${keyword != null and !keyword.isEmpty()}">
+                <input type="hidden" name="keyword" th:value="${keyword}">
+                <input type="hidden" name="page" value="0">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label>Danh mục</label>
+                        <select name="categoryId">
+                            <option value="">Tất cả</option>
+                            <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"
+                                    th:selected="${filter != null and filter.categoryId != null and filter.categoryId == c.id}"></option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Tình trạng</label>
+                        <select name="condition">
+                            <option value="">Tất cả</option>
+                            <option value="NEW" th:selected="${filter != null and filter.condition == 'NEW'}">Mới</option>
+                            <option value="LIKE_NEW" th:selected="${filter != null and filter.condition == 'LIKE_NEW'}">Như mới</option>
+                            <option value="USED" th:selected="${filter != null and filter.condition == 'USED'}">Đã sử dụng</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Giá từ (VNĐ)</label>
+                        <input type="number" name="minPrice" th:value="${filter != null ? filter.minPrice : ''}" placeholder="0" min="0" step="1000">
+                    </div>
+                    <div class="filter-group">
+                        <label>Đến (VNĐ)</label>
+                        <input type="number" name="maxPrice" th:value="${filter != null ? filter.maxPrice : ''}" placeholder="" min="0" step="1000">
+                    </div>
+                    <div class="filter-group">
+                        <label>Địa điểm</label>
+                        <input type="text" name="location" th:value="${filter != null ? filter.location : ''}" placeholder="VD: Hà Nội">
+                    </div>
+                    <div class="filter-group">
+                        <label>Sắp xếp</label>
+                        <select name="sortBy">
+                            <option value="newest" th:selected="${filter == null or filter.sortBy == null or filter.sortBy == 'newest'}">Mới nhất</option>
+                            <option value="price_asc" th:selected="${filter != null and filter.sortBy == 'price_asc'}">Giá tăng dần</option>
+                            <option value="price_desc" th:selected="${filter != null and filter.sortBy == 'price_desc'}">Giá giảm dần</option>
+                            <option value="title" th:selected="${filter != null and filter.sortBy == 'title'}">Tên A-Z</option>
+                        </select>
+                    </div>
+                    <div class="filter-group filter-actions">
+                        <button type="submit" class="btn btn-primary">Lọc</button>
+                        <a th:href="@{/search(keyword=${keyword})}" class="btn btn-outline">Xóa lọc</a>
+                    </div>
+                </div>
+            </form>
+            <!-- Form trang chủ (không có từ khóa) -->
+            <form th:action="@{/}" method="get" class="filter-form" th:unless="${keyword != null and !keyword.isEmpty()}">
+                <input type="hidden" name="page" value="0">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label>Danh mục</label>
+                        <select name="categoryId">
+                            <option value="">Tất cả</option>
+                            <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"
+                                    th:selected="${filter != null and filter.categoryId != null and filter.categoryId == c.id}"></option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Tình trạng</label>
+                        <select name="condition">
+                            <option value="">Tất cả</option>
+                            <option value="NEW" th:selected="${filter != null and filter.condition == 'NEW'}">Mới</option>
+                            <option value="LIKE_NEW" th:selected="${filter != null and filter.condition == 'LIKE_NEW'}">Như mới</option>
+                            <option value="USED" th:selected="${filter != null and filter.condition == 'USED'}">Đã sử dụng</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Giá từ (VNĐ)</label>
+                        <input type="number" name="minPrice" th:value="${filter != null ? filter.minPrice : ''}" placeholder="0" min="0" step="1000">
+                    </div>
+                    <div class="filter-group">
+                        <label>Đến (VNĐ)</label>
+                        <input type="number" name="maxPrice" th:value="${filter != null ? filter.maxPrice : ''}" placeholder="" min="0" step="1000">
+                    </div>
+                    <div class="filter-group">
+                        <label>Địa điểm</label>
+                        <input type="text" name="location" th:value="${filter != null ? filter.location : ''}" placeholder="VD: Hà Nội">
+                    </div>
+                    <div class="filter-group">
+                        <label>Sắp xếp</label>
+                        <select name="sortBy">
+                            <option value="newest" th:selected="${filter == null or filter.sortBy == null or filter.sortBy == 'newest'}">Mới nhất</option>
+                            <option value="price_asc" th:selected="${filter != null and filter.sortBy == 'price_asc'}">Giá tăng dần</option>
+                            <option value="price_desc" th:selected="${filter != null and filter.sortBy == 'price_desc'}">Giá giảm dần</option>
+                            <option value="title" th:selected="${filter != null and filter.sortBy == 'title'}">Tên A-Z</option>
+                        </select>
+                    </div>
+                    <div class="filter-group filter-actions">
+                        <button type="submit" class="btn btn-primary">Lọc</button>
+                        <a th:href="@{/}" class="btn btn-outline">Xóa lọc</a>
+                    </div>
+                </div>
+            </form>
             <div class="products-grid">
                 <a th:each="product : ${products}" 
                    th:href="@{/product/{id}(id=${product.id})}" 
@@ -97,17 +197,63 @@
                 <a th:href="@{/products/create}" class="btn btn-primary" style="margin-top: 1rem;">Đăng sản phẩm đầu tiên</a>
             </div>
             
-            <!-- Pagination -->
-            <div th:if="${totalPages > 1}" class="pagination">
-                <a th:if="${currentPage > 0}" th:href="@{/(page=${currentPage - 1})}">Trước</a>
-                
+            <!-- Pagination - Trang chủ -->
+            <div th:if="${totalPages > 1 and (keyword == null or keyword.isEmpty())}" class="pagination" th:with="
+                catId=${filter != null ? filter.categoryId : null},
+                cond=${filter != null ? filter.condition : null},
+                minP=${filter != null ? filter.minPrice : null},
+                maxP=${filter != null ? filter.maxPrice : null},
+                loc=${filter != null ? filter.location : null},
+                sort=${filter != null ? filter.sortBy : null}
+            ">
+                <a th:if="${currentPage > 0}" th:href="@{/(page=${currentPage - 1}, categoryId=${catId}, condition=${cond}, minPrice=${minP}, maxPrice=${maxP}, location=${loc}, sortBy=${sort})}">Trước</a>
                 <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                    <a th:href="@{/(page=${i})}" 
+                    <a th:href="@{/(page=${i}, categoryId=${catId}, condition=${cond}, minPrice=${minP}, maxPrice=${maxP}, location=${loc}, sortBy=${sort})}"
                        th:text="${i + 1}"
                        th:classappend="${i == currentPage} ? 'active'">Page</a>
                 </span>
-                
-                <a th:if="${currentPage < totalPages - 1}" th:href="@{/(page=${currentPage + 1})}">Sau</a>
+                <a th:if="${currentPage < totalPages - 1}" th:href="@{/(page=${currentPage + 1}, categoryId=${catId}, condition=${cond}, minPrice=${minP}, maxPrice=${maxP}, location=${loc}, sortBy=${sort})}">Sau</a>
+            </div>
+            <!-- Pagination - Tìm kiếm -->
+            <div th:if="${totalPages > 1 and keyword != null and !keyword.isEmpty()}" class="pagination" th:with="
+                catId=${filter != null ? filter.categoryId : null},
+                cond=${filter != null ? filter.condition : null},
+                minP=${filter != null ? filter.minPrice : null},
+                maxP=${filter != null ? filter.maxPrice : null},
+                loc=${filter != null ? filter.location : null},
+                sort=${filter != null ? filter.sortBy : null}
+            ">
+                <a th:if="${currentPage > 0}" th:href="@{/search(page=${currentPage - 1}, keyword=${keyword}, categoryId=${catId}, condition=${cond}, minPrice=${minP}, maxPrice=${maxP}, location=${loc}, sortBy=${sort})}">Trước</a>
+                <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/search(page=${i}, keyword=${keyword}, categoryId=${catId}, condition=${cond}, minPrice=${minP}, maxPrice=${maxP}, location=${loc}, sortBy=${sort})}"
+                       th:text="${i + 1}"
+                       th:classappend="${i == currentPage} ? 'active'">Page</a>
+                </span>
+                <a th:if="${currentPage < totalPages - 1}" th:href="@{/search(page=${currentPage + 1}, keyword=${keyword}, categoryId=${catId}, condition=${cond}, minPrice=${minP}, maxPrice=${maxP}, location=${loc}, sortBy=${sort})}">Sau</a>
+            </div>
+        </section>
+
+        <!-- Gợi ý cho bạn (khi đã đăng nhập) -->
+        <section th:if="${recommendedProducts != null and !#lists.isEmpty(recommendedProducts)}">
+            <h2 class="section-title">Gợi ý cho bạn</h2>
+            <p class="section-desc">Dựa trên danh mục sản phẩm bạn quan tâm</p>
+            <div class="products-grid">
+                <a th:each="product : ${recommendedProducts}"
+                   th:href="@{/product/{id}(id=${product.id})}"
+                   class="product-card">
+                    <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/no-image.png'}"
+                         alt="Product Image" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title" th:text="${product.title}">Product Title</h3>
+                        <div class="product-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">Price</div>
+                        <div class="product-meta">
+                            <span th:text="${product.category.name}">Category</span>
+                            <span class="product-condition"
+                                  th:classappend="${product.condition == 'NEW'} ? 'condition-new' : (${product.condition == 'LIKE_NEW'} ? 'condition-like-new' : 'condition-used')"
+                                  th:text="${product.condition == 'NEW'} ? 'Mới' : (${product.condition == 'LIKE_NEW'} ? 'Như mới' : 'Đã sử dụng')">Condition</span>
+                        </div>
+                    </div>
+                </a>
             </div>
         </section>
     </main>

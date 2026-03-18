@@ -25,9 +25,13 @@
                 </form>
                 <div sec:authorize="isAuthenticated()" class="user-menu">
                     <a th:href="@{/profile}" class="user-info">
-                        <span class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">U</span>
+                        <span th:if="${currentUser != null and currentUser.avatar != null and !currentUser.avatar.isEmpty()}" class="user-avatar">
+                            <img th:src="${currentUser.avatar}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                        </span>
+                        <span th:unless="${currentUser != null and currentUser.avatar != null and !currentUser.avatar.isEmpty()}" class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">U</span>
                         <span class="user-name" th:text="${#authentication.name}">Username</span>
                     </a>
+                    
                     <form th:action="@{/logout}" method="post" style="display: inline;">
                         <button type="submit" class="btn btn-outline">Đăng xuất</button>
                     </form>
@@ -41,8 +45,25 @@
             <h2 style="text-align: center; margin-bottom: 1.5rem; color: var(--secondary-color);">
                 Chỉnh sửa thông tin cá nhân
             </h2>
-            
-            <form th:action="@{/profile/update}" th:object="${user}" method="post">
+            <div th:if="${param.avatarError}" class="alert alert-danger">
+                Ảnh đại diện không hợp lệ. Vui lòng chọn file JPG, PNG, GIF hoặc WebP, tối đa 2MB.
+            </div>
+            <form th:action="@{/profile/update}" th:object="${user}" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Ảnh đại diện</label>
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div th:if="${user.avatar != null and !user.avatar.isEmpty()}" class="avatar-preview">
+                            <img th:src="${user.avatar}" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">
+                        </div>
+                        <div th:unless="${user.avatar != null and !user.avatar.isEmpty()}" class="avatar-placeholder" 
+                             style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--primary-color);"
+                             th:text="${#strings.substring(user.username, 0, 1)}">U</div>
+                        <div style="flex: 1;">
+                            <input type="file" id="avatarFile" name="avatarFile" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="form-control">
+                            <small style="color: var(--text-light);">JPG, PNG, GIF hoặc WebP. Tối đa 2MB.</small>
+                        </div>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label for="username">Tên đăng nhập</label>
                     <input type="text" id="username" th:field="*{username}" readonly 

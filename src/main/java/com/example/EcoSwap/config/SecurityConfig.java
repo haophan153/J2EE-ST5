@@ -22,9 +22,17 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/home", "/products", "/product/**", "/category/**",
-                                "/register", "/login", "/login/**", "/css/**", "/js/**", "/images/**", "/uploads/**",
-                                "/exchanges", "/exchange/**", "/api/**", "/profile/**").permitAll()
+                // Public pages
+                .requestMatchers("/", "/home", "/products", "/product/**", "/category/**", "/categories",
+                                "/search", "/register", "/login", "/login/**",
+                                "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
+                // Authenticated features
+                .requestMatchers("/profile/**", "/products/create", "/products/my", "/products/*/edit",
+                                "/products/*/update", "/products/*/delete",
+                                "/exchanges", "/exchange/**",
+                                "/history/**").authenticated()
+                // API (keep as-is for now)
+                .requestMatchers("/api/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
