@@ -2,7 +2,6 @@ package com.example.EcoSwap.controller;
 
 import com.example.EcoSwap.entity.User;
 import com.example.EcoSwap.service.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -10,11 +9,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequiredArgsConstructor
 public class ProfileController {
 
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+
+    public ProfileController(UserService userService, PasswordEncoder passwordEncoder) {
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @GetMapping("/profile")
     public String profile(Model model, Authentication authentication) {

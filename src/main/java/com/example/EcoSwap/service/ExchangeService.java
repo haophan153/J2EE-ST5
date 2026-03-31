@@ -3,7 +3,6 @@ package com.example.EcoSwap.service;
 import com.example.EcoSwap.entity.*;
 import com.example.EcoSwap.entity.ExchangeRequest.ExchangeStatus;
 import com.example.EcoSwap.repository.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -12,13 +11,22 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class ExchangeService {
-    
+
     private final ExchangeRequestRepository exchangeRequestRepository;
     private final ExchangeMessageRepository exchangeMessageRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+
+    public ExchangeService(ExchangeRequestRepository exchangeRequestRepository,
+                           ExchangeMessageRepository exchangeMessageRepository,
+                           ProductRepository productRepository,
+                           UserRepository userRepository) {
+        this.exchangeRequestRepository = exchangeRequestRepository;
+        this.exchangeMessageRepository = exchangeMessageRepository;
+        this.productRepository = productRepository;
+        this.userRepository = userRepository;
+    }
     
     public List<ExchangeRequest> getSentRequests(Long userId) {
         return exchangeRequestRepository.findByRequesterId(userId);
@@ -140,5 +148,13 @@ public class ExchangeService {
     @Transactional
     public ExchangeRequest completeRequest(Long requestId) {
         return updateStatus(requestId, ExchangeStatus.COMPLETED);
+    }
+
+    public boolean isProductInActiveExchange(Long productId) {
+        return exchangeRequestRepository.existsActiveExchangeForProduct(productId);
+    }
+
+    public List<ExchangeRequest> getActiveExchangesForProduct(Long productId) {
+        return exchangeRequestRepository.findActiveExchangesForProduct(productId);
     }
 }

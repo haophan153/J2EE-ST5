@@ -32,40 +32,7 @@
     </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <a th:href="@{/}" class="logo">
-                <span>♻️</span> Eco<span>Swap</span>
-            </a>
-            <ul class="nav-links">
-                <li><a th:href="@{/}">Trang chủ</a></li>
-                <li><a th:href="@{/products}">Sản phẩm</a></li>
-                <li><a th:href="@{/categories}">Danh mục</a></li>
-                <li><a th:href="@{/exchanges}">Trao đổi</a></li>
-            </ul>
-            <div class="nav-actions">
-                <form th:action="@{/search}" method="get" class="search-form" sec:authorize="isAuthenticated()">
-                    <input type="text" name="keyword" placeholder="Tìm kiếm..." class="search-input">
-                    <button type="submit" class="btn btn-primary">Tìm</button>
-                </form>
-
-                <div sec:authorize="!isAuthenticated()">
-                    <a th:href="@{/login}" class="btn btn-outline">Đăng nhập</a>
-                    <a th:href="@{/register}" class="btn btn-primary">Đăng ký</a>
-                </div>
-
-                <div sec:authorize="isAuthenticated()" class="user-menu">
-                    <a th:href="@{/profile}" class="user-info">
-                        <span class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">U</span>
-                        <span class="user-name" th:text="${#authentication.name}">Username</span>
-                    </a>
-                    <form th:action="@{/logout}" method="post" style="display: inline;">
-                        <button type="submit" class="btn btn-outline">Đăng xuất</button>
-                    </form>
-                </div>
-            </div>
-        </nav>
-    </header>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
     
     <main class="exchange-section">
         <h1>Quản lý trao đổi</h1>

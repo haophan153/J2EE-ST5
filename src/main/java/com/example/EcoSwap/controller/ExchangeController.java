@@ -2,7 +2,6 @@ package com.example.EcoSwap.controller;
 
 import com.example.EcoSwap.entity.*;
 import com.example.EcoSwap.service.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,13 +14,19 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
-@RequiredArgsConstructor
 public class ExchangeController {
-    
+
     private final ExchangeService exchangeService;
     private final ProductService productService;
     private final UserService userService;
-    
+
+    public ExchangeController(ExchangeService exchangeService, ProductService productService,
+                             UserService userService) {
+        this.exchangeService = exchangeService;
+        this.productService = productService;
+        this.userService = userService;
+    }
+
     private User getCurrentUser(UserDetails userDetails) {
         return userService.findByUsername(userDetails.getUsername())
             .orElseThrow(() -> new RuntimeException("User not found"));
@@ -71,10 +76,17 @@ public class ExchangeController {
         if (requestedProduct.getUser().getId().equals(currentUser.getId())) {
             return "redirect:/products/" + productId + "?error=cannot_exchange_own_product";
         }
+
+        // Check if product is already in an active exchange
+        if (exchangeService.isProductInActiveExchange(productId)) {
+            return "redirect:/products/" + productId + "?error=product_in_exchange";
+        }
         
+        // Get user's products that are available and not in active exchange
         List<Product> myProducts = productService.getProductsByUser(currentUser.getId())
             .stream()
             .filter(p -> "AVAILABLE".equals(p.getStatus()))
+            .filter(p -> !exchangeService.isProductInActiveExchange(p.getId()))
             .toList();
         
         model.addAttribute("requestedProduct", requestedProduct);

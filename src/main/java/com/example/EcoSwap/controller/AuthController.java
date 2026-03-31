@@ -2,17 +2,19 @@ package com.example.EcoSwap.controller;
 
 import com.example.EcoSwap.entity.User;
 import com.example.EcoSwap.service.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequiredArgsConstructor
 public class AuthController {
     
     private final UserService userService;
+    
+    public AuthController(UserService userService) {
+        this.userService = userService;
+    }
     
     @GetMapping("/login")
     public String loginPage() {

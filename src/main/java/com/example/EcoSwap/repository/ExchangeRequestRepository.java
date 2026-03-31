@@ -37,4 +37,16 @@ public interface ExchangeRequestRepository extends JpaRepository<ExchangeRequest
         Long requestedProductId, Long requesterId);
     
     long countByOwnerIdAndStatusIn(Long ownerId, List<ExchangeStatus> statuses);
+
+    // Check if product is in an active exchange (PENDING, NEGOTIATING, ACCEPTED)
+    @Query("SELECT COUNT(e) > 0 FROM ExchangeRequest e WHERE " +
+           "(e.offeredProduct.id = :productId OR e.requestedProduct.id = :productId) " +
+           "AND e.status IN ('PENDING', 'NEGOTIATING', 'ACCEPTED')")
+    boolean existsActiveExchangeForProduct(@Param("productId") Long productId);
+
+    // Get active exchanges for a product
+    @Query("SELECT e FROM ExchangeRequest e WHERE " +
+           "(e.offeredProduct.id = :productId OR e.requestedProduct.id = :productId) " +
+           "AND e.status IN ('PENDING', 'NEGOTIATING', 'ACCEPTED')")
+    List<ExchangeRequest> findActiveExchangesForProduct(@Param("productId") Long productId);
 }

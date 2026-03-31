@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -66,7 +67,8 @@
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #333; }
         .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: vertical; min-height: 100px; font-family: inherit; }
-        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
+        /* Không style radio trong .form-group — tránh ghi đè .product-option input */
+        .form-group input:not([type="radio"]) { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
         .btn { padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 500; cursor: pointer; border: none; font-size: 16px; }
         .btn-submit { background: #2ecc71; color: white; width: 100%; transition: all 0.3s; }
         .btn-submit:hover:not(:disabled) { background: #27ae60; }
@@ -80,42 +82,32 @@
             const productOptions = document.querySelectorAll('.product-option');
             const submitBtn = document.getElementById('submitBtn');
             const hasProducts = productOptions.length > 0;
-            
-            // Disable submit initially if there are products (require selection)
+
             if (hasProducts) {
                 submitBtn.disabled = true;
                 submitBtn.style.opacity = '0.6';
                 submitBtn.textContent = 'Vui lòng chọn sản phẩm để trao đổi';
             }
-            
-            productOptions.forEach(option => {
-                // Handle click on the entire option div
+
+            productOptions.forEach(function(option) {
                 option.addEventListener('click', function(e) {
-                    // Prevent any default behavior
-                    e.preventDefault();
                     e.stopPropagation();
-                    
-                    // Remove selected from all
-                    productOptions.forEach(opt => opt.classList.remove('selected'));
-                    
-                    // Add selected to clicked
+
+                    productOptions.forEach(function(opt) { opt.classList.remove('selected'); });
                     this.classList.add('selected');
-                    
-                    // Check the radio inside
+
                     const radio = this.querySelector('input[type="radio"]');
                     radio.checked = true;
-                    
-                    // Enable submit button
+
                     submitBtn.disabled = false;
                     submitBtn.style.opacity = '1';
                     submitBtn.textContent = 'Gửi yêu cầu trao đổi';
                 });
-                
-                // Also listen for radio change (fallback)
+
                 const radio = option.querySelector('input[type="radio"]');
                 radio.addEventListener('change', function() {
                     if (this.checked) {
-                        productOptions.forEach(opt => opt.classList.remove('selected'));
+                        productOptions.forEach(function(opt) { opt.classList.remove('selected'); });
                         option.classList.add('selected');
                         submitBtn.disabled = false;
                         submitBtn.style.opacity = '1';
@@ -127,15 +119,7 @@
     </script>
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <a th:href="@{/}" class="logo"><span>♻️</span> Eco<span>Swap</span></a>
-            <ul class="nav-links">
-                <li><a th:href="@{/}">Trang chủ</a></li>
-                <li><a th:href="@{/products}">Sản phẩm</a></li>
-            </ul>
-        </nav>
-    </header>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <main class="exchange-request-container">
         <a th:href="@{/products/{id}(id=${requestedProduct.id})}" class="btn btn-back">← Quay lại</a>
@@ -172,7 +156,8 @@
                     
                     <div class="product-select" th:unless="${#lists.isEmpty(myProducts)}">
                         <div th:each="product : ${myProducts}" class="product-option">
-                            <input type="radio" name="offeredProductId" th:value="${product.id}" required>
+                            <!-- Chỉ radio đầu tiên có required — đặt required trên mọi radio trong cùng name gây lỗi validation trình duyệt -->
+                            <input type="radio" name="offeredProductId" th:value="${product.id}" th:required="${productStat.first}">
                             <span class="check-icon">✓</span>
                             <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/no-image.png'}" alt="Product">
                             <h4 th:text="${product.title}"></h4>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -62,16 +63,7 @@
     </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <a th:href="@{/}" class="logo"><span>♻️</span> Eco<span>Swap</span></a>
-            <ul class="nav-links">
-                <li><a th:href="@{/}">Trang chủ</a></li>
-                <li><a th:href="@{/products}">Sản phẩm</a></li>
-                <li><a th:href="@{/exchanges}">Trao đổi</a></li>
-            </ul>
-        </nav>
-    </header>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <main class="exchange-detail">
         <a th:href="@{/exchanges}" class="btn btn-back" style="display: inline-block; margin-bottom: 15px;">← Quay lại</a>
@@ -110,17 +102,23 @@
                 </div>
                 
                 <div class="action-buttons" th:if="${exchange.status.name() == 'PENDING' || exchange.status.name() == 'NEGOTIATING'}">
+                    <!-- Chủ sản phẩm có thể chấp nhận hoặc từ chối -->
                     <form th:if="${isOwner}" th:action="@{/exchange/{id}/accept(id=${exchange.id})}" method="post">
                         <button type="submit" class="btn btn-accept">Chấp nhận</button>
                     </form>
                     <form th:if="${isOwner}" th:action="@{/exchange/{id}/reject(id=${exchange.id})}" method="post">
                         <button type="submit" class="btn btn-reject">Từ chối</button>
                     </form>
-                    <form th:if="${exchange.status.name() == 'ACCEPTED'}" th:action="@{/exchange/{id}/complete(id=${exchange.id})}" method="post">
-                        <button type="submit" class="btn btn-complete">Hoàn tất</button>
+                    <!-- Người gửi yêu cầu có thể hủy -->
+                    <form th:unless="${isOwner}" th:action="@{/exchange/{id}/cancel(id=${exchange.id})}" method="post">
+                        <button type="submit" class="btn btn-cancel" onclick="return confirm('Bạn có chắc muốn hủy yêu cầu trao đổi này?');">Hủy yêu cầu</button>
                     </form>
-                    <form th:action="@{/exchange/{id}/cancel(id=${exchange.id})}" method="post">
-                        <button type="submit" class="btn btn-cancel">Hủy</button>
+                    <!-- Cả hai có thể hủy khi đã chấp nhận -->
+                    <form th:if="${exchange.status.name() == 'ACCEPTED'}" th:action="@{/exchange/{id}/cancel(id=${exchange.id})}" method="post">
+                        <button type="submit" class="btn btn-cancel" onclick="return confirm('Bạn có chắc muốn hủy trao đổi này?');">Hủy trao đổi</button>
+                    </form>
+                    <form th:if="${exchange.status.name() == 'ACCEPTED'}" th:action="@{/exchange/{id}/complete(id=${exchange.id})}" method="post">
+                        <button type="submit" class="btn btn-complete">Hoàn tất trao đổi</button>
                     </form>
                 </div>
                 

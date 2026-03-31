@@ -2,7 +2,6 @@ package com.example.EcoSwap.service;
 
 import com.example.EcoSwap.entity.Product;
 import com.example.EcoSwap.repository.ProductRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -11,10 +10,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class ProductService {
-    
+
     private final ProductRepository productRepository;
+
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
     
     public List<Product> getAllProducts() {
         return productRepository.findAll();
@@ -39,6 +41,17 @@ public class ProductService {
     public List<Product> getProductsByUser(Long userId) {
         return productRepository.findByUserId(userId);
     }
+
+    public List<Product> getProductsByUserAndStatus(Long userId, String status) {
+        if (status == null || status.isEmpty() || "ALL".equals(status)) {
+            return productRepository.findByUserId(userId);
+        }
+        return productRepository.findByUserIdAndStatus(userId, status);
+    }
+
+    public Optional<Product> getProductByIdForUser(Long id, Long userId) {
+        return productRepository.findByIdAndUserId(id, userId);
+    }
     
     @Transactional
     public Product createProduct(Product product) {
@@ -49,7 +62,7 @@ public class ProductService {
     public Product updateProduct(Product product) {
         return productRepository.save(product);
     }
-    
+
     @Transactional
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);

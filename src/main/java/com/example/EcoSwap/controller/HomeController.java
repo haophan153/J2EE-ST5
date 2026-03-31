@@ -4,7 +4,6 @@ import com.example.EcoSwap.entity.Category;
 import com.example.EcoSwap.entity.Product;
 import com.example.EcoSwap.service.CategoryService;
 import com.example.EcoSwap.service.ProductService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,11 +14,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequiredArgsConstructor
 public class HomeController {
     
     private final ProductService productService;
     private final CategoryService categoryService;
+    
+    public HomeController(ProductService productService, CategoryService categoryService) {
+        this.productService = productService;
+        this.categoryService = categoryService;
+    }
     
     @GetMapping("/")
     public String home(Model model, @RequestParam(defaultValue = "0") int page) {

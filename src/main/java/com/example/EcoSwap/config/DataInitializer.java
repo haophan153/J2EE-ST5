@@ -4,18 +4,23 @@ import com.example.EcoSwap.entity.Category;
 import com.example.EcoSwap.entity.User;
 import com.example.EcoSwap.repository.CategoryRepository;
 import com.example.EcoSwap.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
     
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final PasswordEncoder passwordEncoder;
+    
+    public DataInitializer(UserRepository userRepository, CategoryRepository categoryRepository,
+                          PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
     
     @Override
     public void run(String... args) {

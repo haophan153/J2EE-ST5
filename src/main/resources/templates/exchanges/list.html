@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,27 +34,13 @@
         .btn-view { background: #3498db; color: white; }
         .btn-accept { background: #27ae60; color: white; }
         .btn-reject { background: #e74c3c; color: white; }
+        .btn-cancel { background: #6c757d; color: white; }
         .empty-state { text-align: center; padding: 60px 20px; color: #999; }
         .empty-state h3 { margin-bottom: 10px; color: #666; }
     </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <a th:href="@{/}" class="logo"><span>♻️</span> Eco<span>Swap</span></a>
-            <ul class="nav-links">
-                <li><a th:href="@{/}">Trang chủ</a></li>
-                <li><a th:href="@{/products}">Sản phẩm</a></li>
-                <li><a th:href="@{/categories}">Danh mục</a></li>
-                <li><a th:href="@{/exchanges}">Trao đổi</a></li>
-            </ul>
-            <div class="nav-actions">
-                <div th:if="${#authentication?.authenticated}">
-                    <a th:href="@{/products/create}" class="btn btn-primary">Đăng bán</a>
-                </div>
-            </div>
-        </nav>
-    </header>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <main class="exchange-container">
         <h1>Quản lý trao đổi</h1>
@@ -130,6 +117,12 @@
                 
                 <div class="exchange-actions">
                     <a th:href="@{/exchange/{id}(id=${req.id})}" class="btn btn-view">Xem chi tiết</a>
+                    <!-- Nút hủy chỉ hiện cho người gửi yêu cầu khi đang ở trạng thái PENDING hoặc NEGOTIATING -->
+                    <form th:if="${req.status.name() == 'PENDING' || req.status.name() == 'NEGOTIATING'}" 
+                          th:action="@{/exchange/{id}/cancel(id=${req.id})}" method="post" style="display: inline;"
+                          onsubmit="return confirm('Bạn có chắc muốn hủy yêu cầu trao đổi này?');">
+                        <button type="submit" class="btn btn-cancel">Hủy yêu cầu</button>
+                    </form>
                 </div>
             </div>
         </div>
