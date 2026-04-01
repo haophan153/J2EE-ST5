@@ -24,9 +24,10 @@ public class DataInitializer implements CommandLineRunner {
     
     @Override
     public void run(String... args) {
-        // Chỉ tạo admin nếu chưa tồn tại
-        if (userRepository.findByUsername("admin").isEmpty()) {
-            User admin = User.builder()
+        // Tạo hoặc cập nhật admin
+        User admin = userRepository.findByUsername("admin").orElse(null);
+        if (admin == null) {
+            admin = User.builder()
                     .username("admin")
                     .email("admin@ecoswap.com")
                     .password(passwordEncoder.encode("admin123"))
@@ -34,8 +35,15 @@ public class DataInitializer implements CommandLineRunner {
                     .phone("0123456789")
                     .address("Hà Nội, Việt Nam")
                     .active(true)
+                    .role("ADMIN")
                     .build();
             userRepository.save(admin);
+        } else {
+            // Đảm bảo admin luôn có role ADMIN (cập nhật nếu thiếu)
+            if (!"ADMIN".equals(admin.getRole())) {
+                admin.setRole("ADMIN");
+                userRepository.save(admin);
+            }
         }
         
         // Tạo user1 nếu chưa tồn tại
@@ -48,6 +56,7 @@ public class DataInitializer implements CommandLineRunner {
                 .phone("0987654321")
                 .address("TP. Hồ Chí Minh, Việt Nam")
                 .active(true)
+                .role("USER")
                 .build();
             userRepository.save(user1);
         }
