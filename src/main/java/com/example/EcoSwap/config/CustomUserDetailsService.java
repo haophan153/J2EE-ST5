@@ -27,11 +27,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (!user.getActive()) {
             throw new UsernameNotFoundException("Tài khoản đã bị vô hiệu hóa");
         }
-        
+
+        String role = user.getRole() != null ? user.getRole() : "USER";
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
         );
     }
 }

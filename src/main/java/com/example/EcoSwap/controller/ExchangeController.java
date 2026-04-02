@@ -32,6 +32,55 @@ public class ExchangeController {
             .orElseThrow(() -> new RuntimeException("User not found"));
     }
     
+    @GetMapping("/exchanges/history")
+    public String exchangeHistory(Model model, @AuthenticationPrincipal UserDetails userDetails,
+                                  @RequestParam(required = false) String status,
+                                  @RequestParam(defaultValue = "0") int page) {
+        User currentUser = getCurrentUser(userDetails);
+        Pageable pageable = PageRequest.of(page, 15);
+
+        // Lấy tất cả trao đổi liên quan đến user (cả gửi và nhận)
+        var allExchanges = exchangeService.getAllUserRequests(currentUser.getId());
+
+        // Lọc theo trạng thái nếu có
+        List<ExchangeRequest> filtered = allExchanges;
+        if (status != null && !status.isEmpty() && !"ALL".equals(status)) {
+            try {
+                ExchangeRequest.ExchangeStatus es = ExchangeRequest.ExchangeStatus.valueOf(status);
+                final ExchangeRequest.ExchangeStatus fs = es;
+                filtered = allExchanges.stream()
+                        .filter(e -> e.getStatus() == fs)
+                        .toList();
+            } catch (IllegalArgumentException ignored) {}
+        }
+
+        // Phân trang thủ công
+        int total = filtered.size();
+        int totalPages = (int) Math.ceil((double) total / 15);
+        int from = page * 15;
+        int to = Math.min(from + 15, total);
+        List<ExchangeRequest> paged = from < total ? filtered.subList(from, to) : List.of();
+
+        // Đếm theo trạng thái
+        long countPending = allExchanges.stream().filter(e -> e.getStatus() == ExchangeRequest.ExchangeStatus.PENDING).count();
+        long countNegotiating = allExchanges.stream().filter(e -> e.getStatus() == ExchangeRequest.ExchangeStatus.NEGOTIATING).count();
+        long countCompleted = allExchanges.stream().filter(e -> e.getStatus() == ExchangeRequest.ExchangeStatus.COMPLETED).count();
+
+        model.addAttribute("exchanges", paged);
+        model.addAttribute("totalCount", total);
+        model.addAttribute("countPending", countPending);
+        model.addAttribute("countNegotiating", countNegotiating);
+        model.addAttribute("countCompleted", countCompleted);
+        model.addAttribute("selectedStatus", status != null ? status : "ALL");
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("currentUserId", currentUser.getId());
+
+        return "exchanges/history";
+    }
+
+    // ===================== DASHBOARD NHANH =====================
+
     @GetMapping("/exchanges")
     public String myExchanges(Model model, @AuthenticationPrincipal UserDetails userDetails,
                               @RequestParam(defaultValue = "0") int page,
